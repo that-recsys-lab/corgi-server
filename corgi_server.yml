@@ -8,3 +8,4 @@ dependencies:
   - Mastodon.py==1.8.*
   - pandas==2.0.*
   - numpy==1.*
+  - flask==2.3.*
