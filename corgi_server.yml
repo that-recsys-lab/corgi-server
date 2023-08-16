@@ -1,0 +1,10 @@
+name: corgi-server
+
+channels:
+  - conda-forge
+  - defaults
+  
+dependencies:
+  - Mastodon.py==1.8.*
+  - pandas==2.0.*
+  - numpy==1.*
