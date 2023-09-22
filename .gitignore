@@ -1,1 +1,5 @@
 *.secret
+first_twenty.csv
+corgi_server.yml
+*.vscode
+__pycache__

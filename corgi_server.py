@@ -59,25 +59,56 @@ def index():
 # Might make more sense to refactor this in the future where status.py and timeline.py is its own file but that's a future problem.
 # Collecting of timelines API calls
 # -----------------------------
-@corgi.route('/api/v1/timelines/public', methods = ["GET"]) 
-def get_public_timeline(headers=None, local=True, remote=False, only_media=False, max_id=None, since_id=None, min_id=None, limit=20):
-    print("Getting public timeline")
-    return Response(status = 200)
-# -----------------------------
-@corgi.route('/api/v1/timelines/tag/<hashtag>', methods = ["GET"])
-def get_hashtag_timeline(hashtag, headers=None, any=[], all=[], none=[], local=True, remote=False, only_media=False, max_id=None, since_id=None, min_id=None, limit=20):
-    print("Getting hashtag timeline")
-    return Response(status = 200)
-# -----------------------------
 @corgi.route('/api/v1/timelines/home', methods = ["GET"])
 def get_home_timeline(headers=None, max_id=None, since_id=None, min_id=None, limit=20):
     print("Getting home timeline")
     return Response(status = 200)
+
 # -----------------------------
+# Fetches the public / visible-network / federated timeline, not including replies. Params as in timeline().
+@corgi.route('/api/v1/timelines/public', methods = ["GET"]) 
+def get_public_timeline(headers=None, local=True, remote=False, only_media=False, max_id=None, since_id=None, min_id=None, limit=20):
+
+    first_five = []
+
+    public_timeline = mastodon.timeline_public(limit=5)
+
+    for post in public_timeline:
+        # A conditional statement to determine whether a status update is boosted or not.
+        # If a post's reblog attribute returns 'None', then only append the username and content.
+        if (post.reblog == None):
+            first_five.append({
+                'username': post.account.username,
+                'content': post.content,
+                'reblogged_user': None,
+                'reblogged_content': None
+            })
+        # Otherwise, append the username and content of the boosted post.
+        else:
+            first_five.append({
+                'username': post.account.username,
+                'content': None,
+                'reblogged_user': post.reblog.account.username,
+                'reblogged_content': post.reblog.content
+            })
+
+    json_output = json.dumps(first_five, indent = 4)
+    return Response(json_output, content_type='application/json')
+
+# -----------------------------
+# Fetch a timeline of toots with a given hashtag. The hashtag parameter should not contain the leading #. Params as in timeline().
+@corgi.route('/api/v1/timelines/tag/<hashtag>', methods = ["GET"])
+def get_hashtag_timeline(hashtag, headers=None, any=[], all=[], none=[], local=True, remote=False, only_media=False, max_id=None, since_id=None, min_id=None, limit=20):
+    print("Getting hashtag timeline")
+    return Response(status = 200)
+
+# -----------------------------
+# Fetches a timeline containing all the toots by users in a given list. Params as in timeline().
 @corgi.route('/api/v1/timelines/list/<list_id>', methods = ["GET"])
 def get_list_timeline(list_id, headers=None, max_id=None, since_id=None, min_id=None, limit=20):
     print("Getting list timeilne")
     return Response(status = 200)
+
 # -----------------------------
 
 if __name__ == '__main__':
